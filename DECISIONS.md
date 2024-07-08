@@ -87,3 +87,149 @@ with the cost calculated and displayed alongside the token count.
     any way.
 -   **No Recursive Directory Processing**: The tool will not process
     directories recursively. It handles files as specified by the user.
+
+## Rough initial architecture
+
+### 1. Command Line Interface (CLI) Layer
+
+This layer handles user interactions, processes input arguments, and triggers
+appropriate actions in the application layer.
+
+**Components:**
+
+-   **CLI Parser:**
+    -   **Responsibilities:**
+        -   Parse command-line arguments.
+        -   Validate input parameters.
+        -   Provide usage instructions.
+    -   **Functions:**
+        -   `parseArguments(args: []const u8) !ParsedArguments`
+        -   `printUsage() void`
+
+### 2. Application Layer
+
+This layer coordinates the execution of the main logic, interacting with the
+domain layer to perform operations and the infrastructure layer to handle I/O
+operations.
+
+**Components:**
+
+-   **TokenCountService:**
+    -   **Responsibilities:**
+        -   Coordinate token counting for a single file.
+        -   Handle multiple files and group by file extension if required.
+        -   Calculate costs based on token count and user-defined price.
+        -   Format the output in the specified format (human-readable, CSV, JSON).
+    -   **Functions:**
+        -   `countTokens(file: File, language: Language) TokenCountResult`
+        -   `groupByFileExtensions(files: []File) GroupedTokenCountResult`
+        -   `calculateCost(tokenCount: usize, pricePerToken: f64) f64`
+        -   `formatOutput(result: TokenCountResult, format: OutputFormat) ![]u8`
+
+### 3. Domain Layer
+
+This layer contains the core business logic and models, handling the actual
+token counting and cost calculation.
+
+**Components:**
+
+-   **TokenCounter:**
+
+    -   **Responsibilities:**
+        -   Tokenize the input file based on the programming language.
+        -   Count tokens including comments.
+    -   **Functions:**
+        -   `countTokens(content: []const u8, language: Language) usize`
+
+-   **CostCalculator:**
+    -   **Responsibilities:**
+        -   Calculate the total cost based on the number of tokens and price per
+            token.
+    -   **Functions:**
+        -   `calculateCost(tokenCount: usize, pricePerToken: f64) f64`
+
+### 4. Infrastructure Layer
+
+This layer handles I/O operations, including reading files and formatting
+output.
+
+**Components:**
+
+-   **FileHandler:**
+
+    -   **Responsibilities:**
+        -   Read content from input files.
+        -   Handle large files efficiently.
+    -   **Functions:**
+        -   `readFile(filePath: []const u8) ![]u8`
+        -   `handleLargeFile(filePath: []const u8) ![]u8`
+
+-   **OutputFormatter:**
+    -   **Responsibilities:**
+        -   Format the output in human-readable, CSV, or JSON format.
+    -   **Functions:**
+        -   `formatAsHumanReadable(result: TokenCountResult) []u8`
+        -   `formatAsCSV(result: TokenCountResult) []u8`
+        -   `formatAsJSON(result: TokenCountResult) []u8`
+
+### Component Responsibilities and Communication
+
+| Layer                | Component         | Responsibilities                                                                 | Functions/Communication                                                                                                                                                                                                                                          |
+| -------------------- | ----------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CLI Layer            | CLI Parser        | Parse and validate command-line arguments, provide usage instructions            | `parseArguments(args: []const u8) !ParsedArguments`, `printUsage() void`                                                                                                                                                                                         |
+| Application Layer    | TokenCountService | Coordinate token counting, handle multiple files, calculate costs, format output | `countTokens(file: File, language: Language) TokenCountResult`, `groupByFileExtensions(files: []File) GroupedTokenCountResult`, `calculateCost(tokenCount: usize, pricePerToken: f64) f64`, `formatOutput(result: TokenCountResult, format: OutputFormat) ![]u8` |
+| Domain Layer         | TokenCounter      | Tokenize files, count tokens                                                     | `countTokens(content: []const u8, language: Language) usize`                                                                                                                                                                                                     |
+|                      | CostCalculator    | Calculate total cost based on token count and price per token                    | `calculateCost(tokenCount: usize, pricePerToken: f64) f64`                                                                                                                                                                                                       |
+| Infrastructure Layer | FileHandler       | Read content from files, handle large files                                      | `readFile(filePath: []const u8) ![]u8`, `handleLargeFile(filePath: []const u8) ![]u8`                                                                                                                                                                            |
+|                      | OutputFormatter   | Format output in specified format                                                | `formatAsHumanReadable(result: TokenCountResult) []u8`, `formatAsCSV(result: TokenCountResult) []u8`, `formatAsJSON(result: TokenCountResult) []u8`                                                                                                              |
+
+### Detailed Breakdown
+
+#### CLI Parser
+
+-   **Input:** Command-line arguments.
+-   **Output:** Parsed arguments object.
+-   **Functions:**
+    -   `parseArguments(args: []const u8) !ParsedArguments`
+    -   `printUsage() void`
+
+#### TokenCountService
+
+-   **Input:** Parsed arguments.
+-   **Output:** Token count and cost in specified format.
+-   **Functions:**
+    -   `countTokens(file: File, language: Language) TokenCountResult`
+    -   `groupByFileExtensions(files: []File) GroupedTokenCountResult`
+    -   `calculateCost(tokenCount: usize, pricePerToken: f64) f64`
+    -   `formatOutput(result: TokenCountResult, format: OutputFormat) ![]u8`
+
+#### TokenCounter
+
+-   **Input:** File content.
+-   **Output:** Token count.
+-   **Functions:**
+    -   `countTokens(content: []const u8, language: Language) usize`
+
+#### CostCalculator
+
+-   **Input:** Token count, price per token.
+-   **Output:** Total cost.
+-   **Functions:**
+    -   `calculateCost(tokenCount: usize, pricePerToken: f64) f64`
+
+#### FileHandler
+
+-   **Input:** File path.
+-   **Output:** File content.
+-   **Functions:**
+    -   `readFile(filePath: []const u8) ![]u8`
+    -   `handleLargeFile(filePath: []const u8) ![]u8`
+
+#### OutputFormatter
+
+-   **Input:** Token count, cost, format type.
+-   **Output:** Formatted string.
+-   **Functions:**
+    -   `formatAsHumanReadable(result: TokenCountResult) []u8`
+    -   `formatAsCSV(result: TokenCountResult) []u8`
+    -   `formatAsJSON(result: TokenCountResult) []u8`
