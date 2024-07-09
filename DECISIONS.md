@@ -233,3 +233,115 @@ output.
     -   `formatAsHumanReadable(result: TokenCountResult) []u8`
     -   `formatAsCSV(result: TokenCountResult) []u8`
     -   `formatAsJSON(result: TokenCountResult) []u8`
+
+### Addendum: Handling .gitignore
+
+To extend the CLI tool with the ability to ignore files specified in a
+`.gitignore` file, we need to add a mechanism to parse the `.gitignore` file
+and filter out the files and directories listed in it from the token counting
+process. This can be integrated into the CLI Parser and the Application
+Layer.
+
+#### Modifications:
+
+**CLI Parser:**
+
+-   **New Responsibility:**
+    -   Parse `.gitignore` file if the user specifies an option to consider it.
+    -   Filter input files based on the `.gitignore` rules.
+-   **New Function:**
+    -   `parseGitignore(gitignorePath: []const u8) ![]const u8`
+
+**TokenCountService:**
+
+-   **New Responsibility:**
+    -   Filter out files based on the parsed `.gitignore` rules before
+        proceeding with token counting.
+-   **New Function:**
+    -   `filterFilesWithGitignore(files: []File, gitignoreRules: []const u8) []File`
+
+### Suggested CLI Parameters
+
+Based on the current specifications and the new .gitignore handling feature,
+here is a list of parameters that the CLI could support.
+
+Aligning the CLI options with the `scc` (Sloc, Cloc, and Code) tool will help
+users familiar with it to easily adopt our CLI tool. Here’s the revised list
+of parameters to match `scc` conventions where applicable:
+
+| Parameter           | Description                                            | Example                       |
+| ------------------- | ------------------------------------------------------ | ----------------------------- |
+| `-i, --include`     | Specify the input file(s) to process.                  | `--include file1.py file2.js` |
+| `-o, --format`      | Specify the output format (human-readable, csv, json). | `--format csv`                |
+| `--price-per-token` | Specify the price per token and the currency.          | `--price-per-token 0.01 USD`  |
+| `-e, --exclude`     | Exclude files and directories matching the pattern.    | `--exclude test/*`            |
+| `--no-gitignore`    | Disable the consideration of .gitignore files.         | `--no-gitignore`              |
+| `--by-file`         | Group results by file.                                 | `--by-file`                   |
+| `--by-lang`         | Group results by file extension (language).            | `--by-lang`                   |
+| `-h, --help`        | Display usage instructions.                            | `--help`                      |
+
+### Parameter Functions:
+
+-   `-i, --include`:
+
+    -   **Description:** Takes one or more file paths or glob patterns as
+        input.
+    -   **Example:** `--include file1.py file2.js`
+
+-   `-o, --format`:
+
+    -   **Description:** Specifies the format of the output. Options are
+        `human-readable`, `csv`, and `json`.
+    -   **Example:** `--format csv`
+
+-   `--price-per-token`:
+
+    -   **Description:** Sets the price per token and the currency.
+    -   **Example:** `--price-per-token 0.01 USD`
+
+-   `-e, --exclude`:
+
+    -   **Description:** Exclude files and directories matching the given
+        pattern.
+    -   **Example:** `--exclude test/*`
+
+-   `--no-gitignore`:
+
+    -   **Description:** Disables the default behavior of considering
+        `.gitignore` rules.
+    -   **Example:** `--no-gitignore`
+
+-   `--by-file`:
+
+    -   **Description:** Groups the results by file.
+    -   **Example:** `--by-file`
+
+-   `--by-lang`:
+
+    -   **Description:** Groups the results by file extension (language).
+    -   **Example:** `--by-lang`
+
+-   `-h, --help`:
+    -   **Description:** Displays usage instructions and exits.
+    -   **Example:** `--help`
+
+### Example Usage:
+
+```sh
+# Count tokens in file1.py and file2.js, output results in CSV format, considering .gitignore rules
+token-counter --include file1.py file2.js --format csv
+
+# Count tokens in all .py files, group by file extension (language), and calculate costs at $0.01 per token
+token-counter --include *.py --by-lang --price-per-token 0.01 USD
+
+# Count tokens excluding test files
+token-counter --include *.py *.js --exclude test/* --format json
+
+# Count tokens in file1.py and file2.js, output results in human-readable format, ignoring .gitignore rules
+token-counter --include file1.py file2.js --no-gitignore --format
+human-readable
+```
+
+This approach provides the flexibility to include or ignore `.gitignore`
+rules based on user preference while keeping the interface intuitive and
+aligned with `scc` conventions.
