@@ -345,3 +345,85 @@ human-readable
 This approach provides the flexibility to include or ignore `.gitignore`
 rules based on user preference while keeping the interface intuitive and
 aligned with `scc` conventions.
+
+### Token Counting Strategies
+
+The CLI tool supports multiple strategies for counting tokens in source code
+files. Users can choose the desired strategy using the `--strategy`
+parameter. The available strategies are:
+
+1.  **Regex-Based Token Counting**
+2.  **Delimiter-Based Token Counting**
+3.  **Specific Sequence Counting**
+4.  **Line-Based Token Counting**
+5.  **Word Boundary Token Counting**
+
+### 1. Regex-Based Token Counting
+
+**Description:**
+Uses regular expressions to identify patterns in the code that correspond to
+different types of tokens.
+
+**Example Usage:**
+
+```sh
+token-counter --include file1.py --strategy regex
+```
+
+### 2. Delimiter-Based Token Counting
+
+**Description:**
+Uses common delimiters (spaces, tabs, newlines, punctuation) to split the
+text into tokens.
+
+**Example Usage:**
+
+```sh
+token-counter --include file1.py --strategy delimiter
+```
+
+### 3. Specific Sequence Counting
+
+**Description:**
+Counts occurrences of specific predefined sequences (e.g., keywords,
+operators).
+
+**Example Usage:**
+
+```sh
+token-counter --include file1.py --strategy specific-sequence
+```
+
+### 4. Line-Based Token Counting
+
+**Description:**
+Breaks down the text into lines and counts tokens line by line, which can
+help in handling line-based comments and simple statements.
+
+**Example Usage:**
+
+```sh
+token-counter --include file1.py --strategy line
+```
+
+### 5. Word Boundary Token Counting
+
+**Description:**
+Uses word boundaries to identify tokens, relying on detecting transitions
+between word characters and non-word characters.
+
+**Example Usage:**
+
+```sh
+token-counter --include file1.py --strategy word-boundary
+```
+
+### Command-Line Parameter for Strategy
+
+| Parameter    | Description                                                                                                              | Example Usage      |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------------ |
+| `--strategy` | Specify the token counting strategy. Options are `regex`, `delimiter`, `specific-sequence`, `line`, and `word-boundary`. | `--strategy regex` |
+
+This allows users to choose the most appropriate token counting strategy for
+their needs by specifying the `--strategy` parameter when running the CLI
+tool.
