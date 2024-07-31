@@ -39,23 +39,18 @@ workflows:
     description: Test the library for defects
     tasks:
       unit:
-        title: Run dart unit tests
-        description: Standard way of writing and running tests in Dart
+        title: Run zig unit tests
+        description: Standard way of writing and running tests in Zig
         motivation: Prevent defects and regressions.
         links:
           - title: Standard Dart test package
-            url: https://pub.dev/packages/test
+            url: https://zig.guide/getting-started/running-tests/
         main:
           commands:
             - title: Format nicely the lib source code
-              run: dart format lib
+              run: zig fmt src
             - title: Format nicely the test source code
-              run: dart format test
-            - title: Run test coverage
-              run: flutter test --coverage
-            - title: Display test coverage Summary
-              description: Assuming that you have run "brew install lcov"
-              run: lcov --list coverage/lcov.info
+              run: zig build test
 
   deps:
     title: Library dependencies
