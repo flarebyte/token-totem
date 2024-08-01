@@ -48,59 +48,75 @@ pub fn countTokensByDelimiter(content: []const u8) usize {
 
     return token_count;
 }
+test "isDelimiter works correctly" {
+    const delimiters = " \t\n\r";
+    for (delimiters) |delimiter| {
+        try std.testing.expect(isDelimiter(delimiter));
+    }
+
+    const non_delimiters = "abc123";
+    for (non_delimiters) |char| {
+        try std.testing.expect(!isDelimiter(char));
+    }
+}
+
+test "isPunctuationOrOperator works correctly" {
+    const punctuations_and_operators = ".,;:!?()[]{}<>/\\|\"'`~@#$%^&*-+=_";
+    for (punctuations_and_operators) |punctuation| {
+        try std.testing.expect(isPunctuationOrOperator(punctuation));
+    }
+
+    const non_punctuations = "abc123";
+    for (non_punctuations) |char| {
+        try std.testing.expect(!isPunctuationOrOperator(char));
+    }
+}
 
 test "countTokensByDelimiter works with normal text" {
     const content = "int main() {\n    printf(\"Hello, World!\");\n}";
-    const expected = 16; // ["int", "main", "(", ")", "{", "printf", "(", "\"", "Hello", ",", "World", "!", "\"", ")", ";", "}"]
+    const expected_tokens = [_][]const u8{ "int", "main", "(", ")", "{", "printf", "(", "\"", "Hello", ",", "World", "!", "\"", ")", ";", "}" };
     const result = countTokensByDelimiter(content);
-    try std.testing.expectEqual(expected, result);
+    try std.testing.expectEqual(@as(usize, expected_tokens.len), result);
 }
 
 test "countTokensByDelimiter works with empty string" {
     const content = "";
-    const expected = 0;
+    const expected_tokens = [_][]const u8{};
     const result = countTokensByDelimiter(content);
-    try std.testing.expectEqual(expected, result);
+    try std.testing.expectEqual(@as(usize, expected_tokens.len), result);
 }
 
 test "countTokensByDelimiter works with only delimiters" {
     const content = " \t\n\r";
-    const expected = 0;
+    const expected_tokens = [_][]const u8{};
     const result = countTokensByDelimiter(content);
-    try std.testing.expectEqual(expected, result);
+    try std.testing.expectEqual(@as(usize, expected_tokens.len), result);
 }
 
 test "countTokensByDelimiter works with single token" {
     const content = "Hello";
-    const expected = 1;
+    const expected_tokens = [_][]const u8{"Hello"};
     const result = countTokensByDelimiter(content);
-    try std.testing.expectEqual(expected, result);
+    try std.testing.expectEqual(@as(usize, expected_tokens.len), result);
 }
 
 test "countTokensByDelimiter works with multiple spaces between tokens" {
     const content = "Hello     World";
-    const expected = 2; // ["Hello", "World"]
+    const expected_tokens = [_][]const u8{ "Hello", "World" };
     const result = countTokensByDelimiter(content);
-    try std.testing.expectEqual(expected, result);
+    try std.testing.expectEqual(@as(usize, expected_tokens.len), result);
 }
 
 test "countTokensByDelimiter works with mixed delimiters" {
     const content = "Hello, World! This\tis\na test.";
-    const expected = 10; // ["Hello", ",", "World", "!", "This", "is", "a", "test", "."]
+    const expected_tokens = [_][]const u8{ "Hello", ",", "World", "!", "This", "is", "a", "test", "." };
     const result = countTokensByDelimiter(content);
-    try std.testing.expectEqual(expected, result);
+    try std.testing.expectEqual(@as(usize, expected_tokens.len), result);
 }
 
 test "countTokensByDelimiter works with delimiters at the start and end" {
     const content = ",;:!Hello World!?;:";
-    const expected = 11; // [",", ";", ":", "!", "Hello", "World", "!", "?", ";", ":"]
+    const expected_tokens = [_][]const u8{ ",", ";", ":", "!", "Hello", "World", "!", "?", ";", ":" };
     const result = countTokensByDelimiter(content);
-    try std.testing.expectEqual(expected, result);
-}
-
-pub fn main() !void {
-    // Run the tests
-    const example_content = "int main() {\n    printf(\"Hello, World!\");\n}";
-    const token_count = countTokensByDelimiter(example_content);
-    std.debug.print("Token count: {}\n", .{token_count});
+    try std.testing.expectEqual(@as(usize, expected_tokens.len), result);
 }
