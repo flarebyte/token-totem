@@ -49,7 +49,7 @@ workflows:
           commands:
             - title: Format nicely the lib source code
               run: zig fmt src
-            - title: Format nicely the test source code
+            - title: Run the unit tests
               run: zig build test
 
   deps:
