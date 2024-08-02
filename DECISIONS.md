@@ -362,7 +362,8 @@ parameter. The available strategies are:
 
 **Description:**
 Uses regular expressions to identify patterns in the code that correspond to
-different types of tokens.
+different types of tokens. Zig doesn't have a built-in standard library for regular expressions. 
+We'll need to use a third-party library and they are not stable yet. (So perhaps an idea for the future)
 
 **Example Usage:**
 
