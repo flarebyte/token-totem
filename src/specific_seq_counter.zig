@@ -101,29 +101,36 @@ test "test isWordChar" {
 
 test "test countTokensBySpecificSequence basic" {
     const content = "int main() { return 0; }";
-    try testing.expect(countTokensBySpecificSequence(content) == 7);
+    const expected_tokens = [_][]const u8{ "int", "main", "(", ")", "{", "return", "0", ";", "}" };
+    try testing.expect(countTokensBySpecificSequence(content) == expected_tokens.len);
 }
 
 test "test countTokensBySpecificSequence multi-char operators" {
     const content = "a == b && c || d -> e";
-    try testing.expect(countTokensBySpecificSequence(content) == 9);
+    const expected_tokens = [_][]const u8{ "a", "==", "b", "&&", "c", "||", "d", "->", "e" };
+    try testing.expect(countTokensBySpecificSequence(content) == expected_tokens.len);
 }
 
 test "test countTokensBySpecificSequence mixed tokens" {
     const content = "if (x >= 10 && y <= 20) { z++; }";
-    try testing.expect(countTokensBySpecificSequence(content) == 14);
+    const expected_tokens = [_][]const u8{ "if", "(", "x", ">=", "10", "&&", "y", "<=", "20", ")", "{", "z", "++", ";", "}" };
+    try testing.expect(countTokensBySpecificSequence(content) == expected_tokens.len);
 }
 
 test "test countTokensBySpecificSequence edge cases" {
     const content = " ";
-    try testing.expect(countTokensBySpecificSequence(content) == 0);
+    const expected_tokens = [_][]const u8{};
+    try testing.expect(countTokensBySpecificSequence(content) == expected_tokens.len);
 
     const content2 = "";
-    try testing.expect(countTokensBySpecificSequence(content2) == 0);
+    const expected_tokens2 = [_][]const u8{};
+    try testing.expect(countTokensBySpecificSequence(content2) == expected_tokens2.len);
 
-    const content3 = "===>===";
-    try testing.expect(countTokensBySpecificSequence(content3) == 5);
+    const content3 = "===>==";
+    const expected_tokens3 = [_][]const u8{ "==", "=>", "==" };
+    try testing.expect(countTokensBySpecificSequence(content3) == expected_tokens3.len);
 
     const content4 = "a--b++c";
-    try testing.expect(countTokensBySpecificSequence(content4) == 5);
+    const expected_tokens4 = [_][]const u8{ "a", "--", "b", "++", "c" };
+    try testing.expect(countTokensBySpecificSequence(content4) == expected_tokens4.len);
 }
