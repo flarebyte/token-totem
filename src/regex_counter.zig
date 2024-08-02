@@ -25,7 +25,7 @@ pub fn countTokensByRegex(content: []const u8) !usize {
     // Define patterns for multi-character operators and other tokens
     const tokenPatterns = [_][]const u8{
         // Multi-character operators
-        "==",                       "!=",                           "<=",         ">=",                     "&&",       "||",                         "++", "--", "->", "=>", "::", ":::", "##", "%%", "\\[\\]", "\\{\\}",
+        "==", "!=", "<=", ">=", "&&", "||", "++", "--", "->", "=>", "::", ":::", "##", "%%", "\\[\\]", "\\{\\}",
         // Single-character operators
         "[(){};,.:<>+\\-*/&|^%!=]",
         // Keywords and identifiers
@@ -37,14 +37,14 @@ pub fn countTokensByRegex(content: []const u8) !usize {
         // Single-line comments
         "//[^\n]*",
         // Multi-line comments
-        "/\\*([^*]|\\*+[^*/])*\\*+/",
+        "/\\*([^*]|\\*+[^*/])*\\*+/"
     };
 
     // Compile all regex patterns
     var regexList = try allocator.alloc(Regex, tokenPatterns.len);
     defer allocator.free(regexList);
 
-    for (tokenPatterns) |pattern| {
+    for (tokenPatterns) |pattern, i| {
         regexList[i] = try Regex.compile(allocator, pattern, .{}, .{});
     }
 
@@ -87,7 +87,7 @@ test "countMatches basic test" {
     var regexList = try allocator.alloc(Regex, patterns.len);
     defer allocator.free(regexList);
 
-    for (patterns) |pattern| {
+    for (patterns) |pattern, i| {
         regexList[i] = try Regex.compile(allocator, pattern, .{}, .{});
     }
 
@@ -103,9 +103,8 @@ test "countMatches with operators" {
     var regexList = try allocator.alloc(Regex, patterns.len);
     defer allocator.free(regexList);
 
-    var i: usize = 0;
-    while (i < patterns.len) : (i += 1) {
-        regexList[i] = try Regex.compile(allocator, patterns[i], .{}, .{});
+    for (patterns) |pattern, i| {
+        regexList[i] = try Regex.compile(allocator, pattern, .{}, .{});
     }
 
     const content = "a == b && c != d;";
@@ -120,7 +119,7 @@ test "countMatches with comments" {
     var regexList = try allocator.alloc(Regex, patterns.len);
     defer allocator.free(regexList);
 
-    for (patterns) |pattern| {
+    for (patterns) |pattern, i| {
         regexList[i] = try Regex.compile(allocator, pattern, .{}, .{});
     }
 
@@ -136,7 +135,7 @@ test "countMatches with strings" {
     var regexList = try allocator.alloc(Regex, patterns.len);
     defer allocator.free(regexList);
 
-    for (patterns) |pattern| {
+    for (patterns) |pattern, i| {
         regexList[i] = try Regex.compile(allocator, pattern, .{}, .{});
     }
 
