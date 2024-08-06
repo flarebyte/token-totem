@@ -68,3 +68,57 @@ test "parseGitIgnoreContent with only comments and whitespace" {
     const patterns = try parseGitIgnoreContent(gitIgnoreContent);
     try std.testing.expect(patterns.len == 0);
 }
+
+test "isIgnored with typical patterns" {
+    const patterns = &[_][]const u8{ ".idea", "*.log", "node_modules/", "build/", ".DS_Store" };
+
+    try std.testing.expect(isIgnored(patterns, "example.log"));
+    try std.testing.expect(!isIgnored(patterns, "example.txt"));
+    try std.testing.expect(isIgnored(patterns, "node_modules/package.json"));
+    try std.testing.expect(isIgnored(patterns, "build/test.o"));
+    try std.testing.expect(isIgnored(patterns, ".DS_Store"));
+}
+
+test "isIgnored with empty patterns list" {
+    const patterns = &[_][]const u8{};
+
+    try std.testing.expect(!isIgnored(patterns, "example.log"));
+    try std.testing.expect(!isIgnored(patterns, "example.txt"));
+    try std.testing.expect(!isIgnored(patterns, "node_modules/package.json"));
+}
+
+test "isIgnored with patterns matching directories" {
+    const patterns = &[_][]const u8{ "node_modules/", "build/", "test/" };
+
+    try std.testing.expect(isIgnored(patterns, "node_modules/package.json"));
+    try std.testing.expect(isIgnored(patterns, "build/test.o"));
+    try std.testing.expect(isIgnored(patterns, "test/test.cpp"));
+    try std.testing.expect(!isIgnored(patterns, "src/test.cpp"));
+}
+
+test "isIgnored with partial matches" {
+    const patterns = &[_][]const u8{ ".log", "build" };
+
+    try std.testing.expect(isIgnored(patterns, "example.log"));
+    try std.testing.expect(isIgnored(patterns, "example.build"));
+    try std.testing.expect(!isIgnored(patterns, "build_directory/file.txt"));
+    try std.testing.expect(!isIgnored(patterns, "logging/example.log.txt"));
+}
+
+test "isIgnored with leading dot patterns" {
+    const patterns = &[_][]const u8{ ".hidden", ".DS_Store" };
+
+    try std.testing.expect(isIgnored(patterns, ".hidden"));
+    try std.testing.expect(!isIgnored(patterns, "visible"));
+    try std.testing.expect(isIgnored(patterns, ".DS_Store"));
+}
+
+test "isIgnored with mixed patterns" {
+    const patterns = &[_][]const u8{ "*.log", "node_modules/", "test/" };
+
+    try std.testing.expect(isIgnored(patterns, "error.log"));
+    try std.testing.expect(isIgnored(patterns, "node_modules/package.json"));
+    try std.testing.expect(isIgnored(patterns, "test/example.cpp"));
+    try std.testing.expect(!isIgnored(patterns, "src/test.cpp"));
+    try std.testing.expect(!isIgnored(patterns, "example.log.txt"));
+}
