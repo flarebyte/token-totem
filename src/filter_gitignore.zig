@@ -15,7 +15,7 @@ fn parseGitIgnoreContent(content: []const u8) ![]const []const u8 {
     var linesIt = std.mem.splitSequence(u8, content, "\n");
 
     while (linesIt.next()) |line| {
-        const trimmed = std.mem.trimRight(u8, line, " \r\n");
+        const trimmed = std.mem.trim(u8, line, " \r\n");
         if (trimmed.len > 0 and !std.mem.startsWith(u8, trimmed, "#")) {
             try patterns.append(trimmed);
         }
