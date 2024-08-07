@@ -1,8 +1,32 @@
 const std = @import("std");
 
+fn matchesPattern(pattern: []const u8, filename: []const u8) bool {
+    var i: usize = 0;
+    var j: usize = 0;
+
+    while (i < pattern.len and j < filename.len) {
+        if (pattern[i] == '*') {
+            i += 1;
+            if (i == pattern.len) {
+                return true;
+            }
+            while (j < filename.len and filename[j] != pattern[i]) {
+                j += 1;
+            }
+        } else if (pattern[i] == filename[j]) {
+            i += 1;
+            j += 1;
+        } else {
+            return false;
+        }
+    }
+
+    return i == pattern.len and j == filename.len;
+}
+
 fn isIgnored(patterns: []const []const u8, filename: []const u8) bool {
     for (patterns) |pattern| {
-        if (std.mem.endsWith(u8, filename, pattern) or std.mem.indexOf(u8, filename, pattern) != null) {
+        if (matchesPattern(pattern, filename)) {
             return true;
         }
     }
@@ -27,6 +51,44 @@ fn parseGitIgnoreContent(content: []const u8) ![]const []const u8 {
 fn respectGitIgnore(gitIgnoreContent: []const u8, filename: []const u8) !bool {
     const patterns = try parseGitIgnoreContent(gitIgnoreContent);
     return isIgnored(patterns, filename);
+}
+
+test "matchesPattern with exact match" {
+    try std.testing.expect(matchesPattern("example.txt", "example.txt"));
+    try std.testing.expect(!matchesPattern("example.txt", "example.log"));
+}
+
+test "matchesPattern with wildcard at the beginning" {
+    try std.testing.expect(matchesPattern("*.txt", "example.txt"));
+    try std.testing.expect(!matchesPattern("*.txt", "example.log"));
+}
+
+test "matchesPattern with wildcard at the end" {
+    try std.testing.expect(matchesPattern("example.*", "example.txt"));
+    try std.testing.expect(matchesPattern("example.*", "example.log"));
+    try std.testing.expect(!matchesPattern("example.*", "sample.log"));
+}
+
+test "matchesPattern with wildcard in the middle" {
+    try std.testing.expect(matchesPattern("ex*ple.txt", "example.txt"));
+    try std.testing.expect(matchesPattern("ex*ple.txt", "exXample.txt"));
+    try std.testing.expect(!matchesPattern("ex*ple.txt", "exXample.log"));
+}
+
+test "matchesPattern with multiple wildcards" {
+    try std.testing.expect(matchesPattern("ex*ple*.txt", "example.txt"));
+    try std.testing.expect(matchesPattern("ex*ple*.txt", "exXampleX.txt"));
+    try std.testing.expect(matchesPattern("ex*ple*.txt", "exXampleXother.txt"));
+    try std.testing.expect(!matchesPattern("ex*ple*.txt", "exXampleXother.log"));
+}
+
+test "matchesPattern with no match" {
+    try std.testing.expect(!matchesPattern("example.txt", "sample.txt"));
+    try std.testing.expect(!matchesPattern("example.*", "example"));
+}
+
+test "matchesPattern with only wildcard" {
+    try std.testing.expect(matchesPattern("*", "anything.txt"));
 }
 
 test "parseGitIgnoreContent with typical content" {
