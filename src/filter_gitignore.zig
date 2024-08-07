@@ -1,6 +1,11 @@
 const std = @import("std");
 
 fn matchesPattern(pattern: []const u8, filename: []const u8) bool {
+    // If pattern ends with '/', check if the filename starts with the pattern
+    if (std.mem.endsWith(u8, pattern, "/")) {
+        return std.mem.startsWith(u8, filename, pattern) or std.mem.startsWith(u8, filename, pattern[0 .. pattern.len - 1]);
+    }
+
     var i: usize = 0;
     var j: usize = 0;
 
@@ -21,6 +26,7 @@ fn matchesPattern(pattern: []const u8, filename: []const u8) bool {
         }
     }
 
+    // Handle patterns that exactly match the filename
     return i == pattern.len and j == filename.len;
 }
 
